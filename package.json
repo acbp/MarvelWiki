@@ -1,0 +1,35 @@
+{
+  "name": "marvel-wiki-react",
+  "version": "0.1.0",
+  "description": "estudo de react com api da marvel",
+  "main": "src/index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/acbp/react.git"
+  },
+  "keywords": [
+    "reactjs",
+    "js",
+    "marvel",
+    "api"
+  ],
+  "author": "alexandre calil blasizza paravani",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/acbp/react/issues"
+  },
+  "homepage": "https://github.com/acbp/react#readme",
+  "devDependencies": {
+    "react-scripts": "0.8.5"
+  },
+  "dependencies": {
+    "react": "^15.4.2",
+    "react-dom": "^15.4.2"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject"
+  }
+}
