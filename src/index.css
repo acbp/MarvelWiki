@@ -3,3 +3,54 @@ body {
   padding: 0;
   font-family: sans-serif;
 }
+
+.timeline {
+  min-width: 640px;
+  max-width: 1280px;
+  
+  width: 100%;
+  background-color: antiquewhite;
+  border: 1px solid black ;
+  overflow: hidden;
+}
+
+.thumbnail{
+  margin: 16px ;
+  
+  min-height: 220px;
+  max-height: 2200px;
+  
+  display: inline-block;
+  
+  min-width: 160px;
+  max-width: 1600px;
+}
+
+.img-exp{
+  background-image: url("https://i.annihil.us/u/prod/marvel/i/mg/9/40/50b4fc783d30f.jpg");
+}
+
+.App {
+  text-align: center;
+}
+
+.App-logo {
+  animation: App-logo-spin infinite 20s linear;
+  height: 80px;
+}
+
+.App-header {
+  background-color: #222;
+  height: 150px;
+  padding: 20px;
+  color: white;
+}
+
+.App-intro {
+  font-size: large;
+}
+
+@keyframes App-logo-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
