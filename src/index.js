@@ -6,8 +6,13 @@ import React, {
 }
 from 'react';
 import ReactDOM from 'react-dom';
-import logo from './logo.svg';
+import 
+    { 
+        Button, ButtonGroup, Glyphicon, Modal, Popover, Tooltip, OverlayTrigger, Carousel
+    } from 'react-bootstrap'
 import $ from 'jquery'
+import 'bootstrap/dist/css/bootstrap.css';
+import data from './data.json'
 
 function api(urlPart){
   urlPart = urlPart||"";
@@ -37,9 +42,7 @@ class Card extends Component {
       //TODO fazer efeito de hover,out visited
     return (
       <div className="timeline" >
-      <img role="presentation" src={this.props.thumbnail.path+"."+this.props.thumbnail.type} className="thumbnail"/> 
-      </ div>
-
+      <img role="presentation" src={this.props.thumbnail.path+"/portrait_incredible."+this.props.thumbnail.type} className="thumbnail"/></div>
     );
   }
 }
@@ -96,6 +99,87 @@ class Card extends Component {
 //}
 //
 
+const ExampleComicsModal = React.createClass({
+    getInitialState() {
+        return { showModal: false };
+    },
+
+    close() {
+        this.setState({ showModal: false });
+    },
+
+    open() {
+        this.setState({ showModal: true });
+    },
+
+  render() {
+      
+    const comicsData = this.props.comics.data.results.map(function(e,i){
+        return (
+            {
+                id:e.id,
+                title:e.title,
+                pageCount:e.pageCount,
+                thumbnail:e.thumbnail.path+"/portrait_incredible."+e.thumbnail.extension,
+                details:e.urls[0].url,
+                reader:e.urls[1].url,
+                
+            });
+        
+    })
+    
+    const carouselArr= comicsData.map(function(e){
+        return (
+            <Carousel.Item>
+              <img className="carouselModal" src={e.thumbnail}
+              />
+              <Carousel.Caption>
+                <h3>{e.title}</h3>
+                <ButtonGroup>
+                    <Button href={e.details}><Glyphicon glyph="glyphicon glyphicon-plus" /></Button>
+                    <Button href={e.reader}><Glyphicon glyph="glyphicon glyphicon-search" /></Button>
+                </ButtonGroup>
+              </Carousel.Caption>
+            </Carousel.Item>
+        );
+    })
+    
+    return(
+        <div>
+            <Button bsStyle="primary" bsSize="large" onClick={this.open}>
+                Show comics modal
+            </Button>
+            
+            <Modal show={this.state.showModal} onHide={this.close} enforceFocus={true}>
+
+                <Modal.Header>
+                    <p>//todo: inserir dinamicament conteudo aqui</p>
+                    <p>/{comicsData[0].thumbnail+""}</p>
+                    <p>/{comicsData[0].id+""}</p>
+                    <p>/{comicsData[0].pageCount+""}</p>
+                    <Carousel>
+                        {carouselArr}
+                    </Carousel>
+                </Modal.Header>
+
+                <Modal.Body>
+                    <h4>Text in a modal body</h4>
+                </Modal.Body>
+
+                <Modal.Footer>
+                    <p>{this.props.comics.attributionText}</p>
+                </Modal.Footer>
+            </Modal>
+        </div>
+    );
+  }
+});
+
+
+const Timeline = Reac.createClass({
+    
+});
+
 class App extends Component {
   constructor(){
     super();
@@ -134,22 +218,22 @@ class App extends Component {
     return ( 
       <div className="App">
         <div className="App-header">
-          <img src={ logo } className="App-logo" alt="logo" />
           <h2> Welcome to MediaWiki </h2>
         </div>
-        <p className="App-intro">
+        
+        <div className="App-intro">
+         <ExampleComicsModal comics={data} />
+         <Timeline />
           Timeline comics<br/>
-      
           Timeline characters<br/>
-      
           Timeline authors<br/>
       
-          <Card title="Spider-man" issue="#100" thumbnail={ this.exp } />
           
           Conteúdo autoral da Marvel<br/>
-        </p>
+        </div>
       </div>
     );
+//          <Card title="Spider-man" issue="#100" thumbnail={ this.exp } />
   }
 }
 
