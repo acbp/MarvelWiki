@@ -4,45 +4,13 @@ body {
     font-family: sans-serif;
 }
 
-.timeline {
-    min-width: 640px;
-    max-width: 1280px;
-    width: 100%;
-    background-color: antiquewhite;
-    border: 1px solid black;
-    overflow: hidden;
-}
-
-.thumbnail {
-    margin: 16px;
-    min-height: 220px;
-    min-width: 160px;
-    display: inline-block;
-    max-height: 2200px;
-    max-width: 1600px;
-}
-
-.carouselModal {
-    margin-left: auto;
-    margin-right: auto;
-}
-
-.img-exp {
-    background-image: url("https://i.annihil.us/u/prod/marvel/i/mg/9/40/50b4fc783d30f.jpg");
-}
-
 .App {
     text-align: center;
 }
 
-.App-logo {
-    animation: App-logo-spin infinite 20s linear;
-    height: 80px;
-}
-
 .App-header {
     background-color: #222;
-    height: 150px;
+    height: 10rem;
     padding: 20px;
     color: white;
 }
@@ -51,11 +19,29 @@ body {
     font-size: large;
 }
 
-@keyframes App-logo-spin {
-    from {
-        transform: rotate(0deg);
-    }
-    to {
-        transform: rotate(360deg);
-    }
+.thumbnail {
+    margin: 16px;
+    max-height: 480px;
+    max-width: 320px;
+    display: inline-block;
+    background-image: url("https://i.annihil.us/u/prod/marvel/i/mg/b/40/image_not_available/portrait_incredible.jpg");
+    
+    background-size: cover;
+    min-height: 240px;
+    min-width: 160px;
+}
+
+.image-center {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+
+.footer {
+  position: absolute;
+  right: 0;
+  left: 0;
+  padding: 1rem;
+  background-color: #efefef;
+  text-align: center;
 }

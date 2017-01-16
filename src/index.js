@@ -9,10 +9,13 @@ import ReactDOM from 'react-dom';
 import 
     { 
         Button, ButtonGroup, Glyphicon, Modal, Popover, Tooltip, OverlayTrigger, Carousel
-    } from 'react-bootstrap'
-import $ from 'jquery'
+    } from 'react-bootstrap';
+import $ from 'jquery';
 import 'bootstrap/dist/css/bootstrap.css';
-import data from './data.json'
+import data from './data.json';
+import Infinite from 'react-infinite';
+
+const imageNotFound="https://i.annihil.us/u/prod/marvel/i/mg/b/40/image_not_available/standard_xlarge.jpg";
 
 function api(urlPart){
   urlPart = urlPart||"";
@@ -34,207 +37,212 @@ function getComics(urlPart){
 //
 class Card extends Component {
   render() {
-      //TODO criar card/gridUnit
-      //TODO carregar thumbnail {thumbnail.path}
-      //TODO carregar titulo {title}
-      //TODO ao clicar deve abrir um modal com os dados da revista.
-      //TODO 1 botões leitura com icone de lupa
-      //TODO fazer efeito de hover,out visited
     return (
       <div className="timeline" >
       <img role="presentation" src={this.props.thumbnail.path+"/portrait_incredible."+this.props.thumbnail.type} className="thumbnail"/></div>
     );
   }
 }
-//
-//class Details extends Component {
-//  render(){
-//    return (
-//      <div >
-//      //TODO CRIAR MODAL ACIMA DA GRID
-//      //TODO HEADER TITULO
-//      //TODO SUBHEADER EDIÇÃO
-//      //TODO DATA DE LANSAMENTO
-//      //TODO AUTOR
-//      //TODO ARTISTA
-//      </ div >
-//    );
-//  }
-//}
-//
-////detais e comprar
-//class Urls extends Component {
-//  
-//}
-//
-//class Series extends Component {
-//  
-//}
-//
-//
-//class Variants extends Component {
-//  
-//}
-//
-//class Collections extends Component {
-//  
-//}
-//
-//class Dates extends Component {
-//  
-//}
-//
-//class Prices extends Component {
-//  //todo se não tiver preço é pq não tem mais. trocar por indisponivel
-//}
-//
-//class Creators extends Component {
-//  
-//}
-//class Characters extends Component {
-//  
-//}
-//class Stories extends Component {
-//  
-//}
-//
 
-const ExampleComicsModal = React.createClass({
-    getInitialState() {
-        return { showModal: false };
-    },
 
-    close() {
-        this.setState({ showModal: false });
-    },
-
-    open() {
-        this.setState({ showModal: true });
-    },
-
-  render() {
-      
-    const comicsData = this.props.comics.data.results.map(function(e,i){
+const ListItem2 = React.createClass({
+    render: function() {
         return (
-            {
-                id:e.id,
-                title:e.title,
-                pageCount:e.pageCount,
-                thumbnail:e.thumbnail.path+"/portrait_incredible."+e.thumbnail.extension,
-                details:e.urls[0].url,
-                reader:e.urls[1].url,
-                
-            });
-        
-    })
-    
-    const carouselArr= comicsData.map(function(e){
-        return (
-            <Carousel.Item>
-              <img className="carouselModal" src={e.thumbnail}
-              />
-              <Carousel.Caption>
-                <h3>{e.title}</h3>
-                <ButtonGroup>
-                    <Button href={e.details}><Glyphicon glyph="glyphicon glyphicon-plus" /></Button>
-                    <Button href={e.reader}><Glyphicon glyph="glyphicon glyphicon-search" /></Button>
-                </ButtonGroup>
-              </Carousel.Caption>
-            </Carousel.Item>
+            <div className="thumbnail image-center">
+            <img role="presentation" src={this.props.url} className="thumbnail image-center"></img>
+            </div>
         );
-    })
-    
-    return(
-        <div>
-            <Button bsStyle="primary" bsSize="large" onClick={this.open}>
-                Show comics modal
-            </Button>
-            
-            <Modal show={this.state.showModal} onHide={this.close} enforceFocus={true}>
-
-                <Modal.Header>
-                    <p>//todo: inserir dinamicament conteudo aqui</p>
-                    <p>/{comicsData[0].thumbnail+""}</p>
-                    <p>/{comicsData[0].id+""}</p>
-                    <p>/{comicsData[0].pageCount+""}</p>
-                    <Carousel>
-                        {carouselArr}
-                    </Carousel>
-                </Modal.Header>
-
-                <Modal.Body>
-                    <h4>Text in a modal body</h4>
-                </Modal.Body>
-
-                <Modal.Footer>
-                    <p>{this.props.comics.attributionText}</p>
-                </Modal.Footer>
-            </Modal>
-        </div>
-    );
-  }
+    }
 });
 
 
-const Timeline = Reac.createClass({
+const InfiniteList2 = React.createClass({
+    getInitialState: function() {
+        return {
+            elements: this.buildElements(0,20),
+            offset:0,
+            total:Number.POSITIVE_INFINITY,
+            limit:0,
+            isInfiniteLoading: false
+        }
+    },
     
+    buildElements: function(start, end) {
+        var elements = [];
+        for (var i = start; i < end; i++) {
+            elements.push(<ListItem key={i}/>)
+        }
+        return elements;
+    },
+    
+
+    handleInfiniteLoad: function() {
+        var that = this, 
+            query, 
+            isFinished=(this.state.total>this.state.offset)===false;
+        
+        if(isFinished){
+            return;
+        }
+        
+        this.setState({
+            isInfiniteLoading: true
+        });
+        
+        query="?format=comic&formatType=comic&orderBy=-onsaleDate&limit=50&offset="+this.state.offset;
+     
+        getComics(query).then(
+            function(r){
+                console.log(r.data.results);
+                var data = r.data,
+                    newElements = data.results.map(function(e,i){
+                        var url = e.thumbnail || e.images;
+                        url = url.path+"/portrait_incredible."+url.extension;
+                        return (<ListItem url={url} key={i}/>);
+                    });
+                    
+                that.setState({
+                    isInfiniteLoading: false,
+                    total:data.total,
+                    offset:(data.offset+1),
+                    elements: that.state.elements.concat(newElements)
+                });
+            }
+        );
+        
+    },
+
+    elementInfiniteLoad: function() {
+        return <div className="infinite-list-item">
+            Loading...
+        </div>;
+    },
+
+    render: function() {
+        return <Infinite elementHeight={220}                         
+                         containerHeight={1000}
+                         infiniteLoadingBeginBottomOffset={660}
+                         timeScrollStateLastsForAfterUserScrolls={100}
+                         onInfiniteLoad={this.handleInfiniteLoad}
+                         loadingSpinnerDelegate={this.elementInfiniteLoad()}
+                         isInfiniteLoading={this.state.isInfiniteLoading}
+                         >
+            {this.elements}
+        </Infinite>;
+    }
+});
+
+
+var ListItem = React.createClass({
+    getDefaultProps: function() {
+        return {
+            height: 50,
+            lineHeight: "50px"
+        }
+    },
+    render: function() {
+        return (
+            <div >
+                <img 
+                    role="presentation" 
+                    src={this.props.url} 
+                    className="thumbnail image-center"></img>
+            </div>
+        );
+    }
+});
+
+var InfiniteList = React.createClass({
+    getInitialState: function() {
+        return {
+            elements: this.buildElements(0, 50),
+            isInfiniteLoading: false
+        }
+    },
+
+    buildElements: function(start, end) {
+        var elements = [];
+        for (var i = start; i < end; i++) {
+            elements.push(<ListItem key={i} index={i}/>)
+        }
+        return elements;
+    },
+
+    handleInfiniteLoad: function() {
+        var that = this, 
+            query, 
+            isFinished=(this.state.total>this.state.offset)===false;
+        
+        if(isFinished){
+            return;
+        }
+        
+        this.setState({
+            isInfiniteLoading: true
+        });
+        
+        query="?format=comic&formatType=comic&orderBy=-onsaleDate&limit=50&offset="+this.state.offset;
+     
+        getComics(query).then(
+            function(r){
+                console.log(r.data.results);
+                var data = r.data,
+                    newElements = data.results.map(function(e,i){
+                        var url = e.thumbnail || e.images;
+                        url = url.path+"/portrait_incredible."+url.extension;
+                        return (<ListItem url={url} key={i}/>);
+                    });
+                    
+                that.setState({
+                    isInfiniteLoading: false,
+                    total:data.total,
+                    offset:(data.offset+1),
+                    elements: that.state.elements.concat(newElements)
+                });
+            }
+        );
+        
+    },
+
+    elementInfiniteLoad: function() {
+        return <div className="infinite-list-item">
+            Loading...
+        </div>;
+    },
+
+    render: function() {
+        return <Infinite elementHeight={220}
+                         containerHeight={window.innerHeight}
+                         infiniteLoadBeginEdgeOffset={200}
+                         onInfiniteLoad={this.handleInfiniteLoad}
+                         loadingSpinnerDelegate={this.elementInfiniteLoad()}
+                         isInfiniteLoading={this.state.isInfiniteLoading}
+                         timeScrollStateLastsForAfterUserScrolls={2000}
+                         useWindowAsScrollContainer={true}
+                         >
+                    {this.state.elements}
+                </Infinite>;
+    }
 });
 
 class App extends Component {
-  constructor(){
-    super();
-    this.states={loadedComics:{}};
-    this.exp= {path:"https://i.annihil.us/u/prod/marvel/i/mg/9/40/50b4fc783d30f",type:"jpg"} ;
-  }
-  loadHeroes= () =>{
-		getCharacters().then(
-      r => {
-			 console.log(r.data.results);
-		  }
-    );
-	}
   
-  loadComics = index =>{
-    
-    let query = "?format=comic&", ds = this.states={};
-    
-    ds.dateRange="dateRange=2016-01-01%2C2017-01-01";
-    ds.limit="limit=10";
-    ds.offset="offset="+index;
-    
-    query=ds.dateRange && query+"&"+ds.dateRange;
-    query=ds.limit &&  query+"&"+ds.limit;
-    query=ds.offset &&  query+"&"+ds.offset;
-    
-    getComics( query ).then( 
-      r =>{
-        console.log(r.data.results);
-        this.states.loadedComics.setState(r.data.results);
-      }
-    );    
-  }
-  
-  render() {
-    return ( 
-      <div className="App">
-        <div className="App-header">
-          <h2> Welcome to MediaWiki </h2>
-        </div>
-        
-        <div className="App-intro">
-         <ExampleComicsModal comics={data} />
-         <Timeline />
-          Timeline comics<br/>
-          Timeline characters<br/>
-          Timeline authors<br/>
+    render() {
       
-          
-          Conteúdo autoral da Marvel<br/>
-        </div>
-      </div>
-    );
-//          <Card title="Spider-man" issue="#100" thumbnail={ this.exp } />
-  }
+        return ( 
+            <div className="App">
+                <div className="App-header">
+                    <h2> Welcome to MediaWiki </h2>
+                </div>
+
+                <InfiniteList />
+
+                <div className="footer">
+                    <h6>{data.attributionText}</h6>
+                </div>
+            </div>
+        );
+    }
 }
 
 
