@@ -8,12 +8,11 @@ from 'react';
 import ReactDOM from 'react-dom';
 import 
     { 
-        Button, ButtonGroup, Glyphicon, Modal, Popover, Tooltip, OverlayTrigger, Carousel
+       Tooltip, OverlayTrigger
     } from 'react-bootstrap';
+import {Modal,ModalManager,Effect} from 'react-dynamic-modal'
 import $ from 'jquery';
-import 'bootstrap/dist/css/bootstrap.css';
 import data from './data.json';
-import Infinite from 'react-infinite';
 
 const imageNotFound="https://i.annihil.us/u/prod/marvel/i/mg/b/40/image_not_available/standard_xlarge.jpg";
 
@@ -33,58 +32,117 @@ function getComics(urlPart){
 	return api("comics"+urlPart);
 }
 
-//todo criar componente de timeline components, filtar por ano.
-//
-class Card extends Component {
-  render() {
+
+/**
+ * Função para mapear dados do comics para elemento da lista.
+ * @private
+ * @param   {object} e - dados do comics.
+ * @param   {number} i - index.
+ * @param   {array}  a - array que esta sendo lido.
+ * @returns {array}  lista de elementos.
+ */
+const mapComicsElement = function _mapComicsElement(e, i, a){
+    var url = e.thumbnail || e.images;
+    url = url.path+"/portrait_incredible."+url.extension;
     return (
-      <div className="timeline" >
-      <img role="presentation" src={this.props.thumbnail.path+"/portrait_incredible."+this.props.thumbnail.type} className="thumbnail"/></div>
+        <Card url={url} key={i} data={e} />
     );
-  }
+};
+
+//const ComicsModal = React.createClass({
+//  getInitialState() {
+//      return { showModal: false };
+//  },
+//
+//  close() {
+//      this.setState({ showModal: false });
+//  },
+//
+//  open() {
+//      this.setState({ showModal: true });
+//  },
+//
+//  render() {
+//    const comicsData=this.props.data;
+//    
+//    return(
+//        <div>
+//            <Modal show={this.state.showModal} onHide={this.close} enforceFocus={true}>
+//                <Modal.Header>
+//                </Modal.Header>
+//
+//                <Modal.Body>
+//                    <h4>Text in a modal body</h4>
+//                </Modal.Body>
+//
+//                <Modal.Footer>
+//                </Modal.Footer>
+//            </Modal>
+//        </div>
+//    );
+//  }
+//});
+
+class ComicsModal extends Component{
+   render(){
+      const { comics, url } = this.props;
+      const divStyle = {
+          backgroundImage: 'url(' + url + ')',
+      };
+      return (
+         <Modal effect={Effect.ScaleUp} style={divStyle}>
+            <div className="image-center">
+              <h1>{comics.title}</h1>
+              <h4 >Pages:{comics.pages}</h4>
+
+              <p>{comics.description}</p>
+              <div className='modal-bg'></div>
+            </div>
+            
+            
+         </Modal>
+      );
+   }
 }
 
 
-const ListItem2 = React.createClass({
-    render: function() {
-        return (
-            <div className="thumbnail image-center">
-            <img role="presentation" src={this.props.url} className="thumbnail image-center"></img>
-            </div>
-        );
-    }
+const Card = React.createClass({
+ openModal(){
+     const data = this.props.data;
+     const url = this.props.url;
+     ModalManager.open(<ComicsModal comics={data} url={url} />);
+  },
+  
+  render() {
+    return (
+       <div className="image-center">
+          <img  onClick={this.openModal}
+                role="presentation" 
+                src={this.props.url} 
+                className="thumbnail image-center">
+          </img>
+      </div>
+    );
+  }
 });
 
 
-const InfiniteList2 = React.createClass({
+var List = React.createClass({
     getInitialState: function() {
         return {
-            elements: this.buildElements(0,20),
-            offset:0,
+            elements: [],
             total:Number.POSITIVE_INFINITY,
-            limit:0,
+            offset:0,
+            limite:25,
             isInfiniteLoading: false
         }
     },
-    
-    buildElements: function(start, end) {
-        var elements = [];
-        for (var i = start; i < end; i++) {
-            elements.push(<ListItem key={i}/>)
-        }
-        return elements;
-    },
-    
 
     handleInfiniteLoad: function() {
         var that = this, 
             query, 
             isFinished=(this.state.total>this.state.offset)===false;
-        
-        if(isFinished){
-            return;
-        }
-        
+      
         this.setState({
             isInfiniteLoading: true
         });
@@ -92,136 +150,30 @@ const InfiniteList2 = React.createClass({
         query="?format=comic&formatType=comic&orderBy=-onsaleDate&limit=50&offset="+this.state.offset;
      
         getComics(query).then(
-            function(r){
-                console.log(r.data.results);
-                var data = r.data,
-                    newElements = data.results.map(function(e,i){
-                        var url = e.thumbnail || e.images;
-                        url = url.path+"/portrait_incredible."+url.extension;
-                        return (<ListItem url={url} key={i}/>);
-                    });
-                    
-                that.setState({
-                    isInfiniteLoading: false,
-                    total:data.total,
-                    offset:(data.offset+1),
-                    elements: that.state.elements.concat(newElements)
-                });
-            }
+          function(r){
+            var data = r.data,
+                newElements = data.results.map(mapComicsElement);
+
+            that.setState({
+                isInfiniteLoading: false,
+                total:data.total,
+                offset: that.state.offset+1,
+                elements: that.state.elements.concat(newElements)
+            });
+          }
         );
-        
     },
 
-    elementInfiniteLoad: function() {
-        return <div className="infinite-list-item">
-            Loading...
-        </div>;
+    componentWillMount: function() {
+      this.handleInfiniteLoad();
     },
-
-    render: function() {
-        return <Infinite elementHeight={220}                         
-                         containerHeight={1000}
-                         infiniteLoadingBeginBottomOffset={660}
-                         timeScrollStateLastsForAfterUserScrolls={100}
-                         onInfiniteLoad={this.handleInfiniteLoad}
-                         loadingSpinnerDelegate={this.elementInfiniteLoad()}
-                         isInfiniteLoading={this.state.isInfiniteLoading}
-                         >
-            {this.elements}
-        </Infinite>;
-    }
-});
-
-
-var ListItem = React.createClass({
-    getDefaultProps: function() {
-        return {
-            height: 50,
-            lineHeight: "50px"
-        }
-    },
+  
     render: function() {
         return (
-            <div >
-                <img 
-                    role="presentation" 
-                    src={this.props.url} 
-                    className="thumbnail image-center"></img>
-            </div>
+          <div>
+            {this.state.elements}
+          </div>
         );
-    }
-});
-
-var InfiniteList = React.createClass({
-    getInitialState: function() {
-        return {
-            elements: this.buildElements(0, 50),
-            isInfiniteLoading: false
-        }
-    },
-
-    buildElements: function(start, end) {
-        var elements = [];
-        for (var i = start; i < end; i++) {
-            elements.push(<ListItem key={i} index={i}/>)
-        }
-        return elements;
-    },
-
-    handleInfiniteLoad: function() {
-        var that = this, 
-            query, 
-            isFinished=(this.state.total>this.state.offset)===false;
-        
-        if(isFinished){
-            return;
-        }
-        
-        this.setState({
-            isInfiniteLoading: true
-        });
-        
-        query="?format=comic&formatType=comic&orderBy=-onsaleDate&limit=50&offset="+this.state.offset;
-     
-        getComics(query).then(
-            function(r){
-                console.log(r.data.results);
-                var data = r.data,
-                    newElements = data.results.map(function(e,i){
-                        var url = e.thumbnail || e.images;
-                        url = url.path+"/portrait_incredible."+url.extension;
-                        return (<ListItem url={url} key={i}/>);
-                    });
-                    
-                that.setState({
-                    isInfiniteLoading: false,
-                    total:data.total,
-                    offset:(data.offset+1),
-                    elements: that.state.elements.concat(newElements)
-                });
-            }
-        );
-        
-    },
-
-    elementInfiniteLoad: function() {
-        return <div className="infinite-list-item">
-            Loading...
-        </div>;
-    },
-
-    render: function() {
-        return <Infinite elementHeight={220}
-                         containerHeight={window.innerHeight}
-                         infiniteLoadBeginEdgeOffset={200}
-                         onInfiniteLoad={this.handleInfiniteLoad}
-                         loadingSpinnerDelegate={this.elementInfiniteLoad()}
-                         isInfiniteLoading={this.state.isInfiniteLoading}
-                         timeScrollStateLastsForAfterUserScrolls={2000}
-                         useWindowAsScrollContainer={true}
-                         >
-                    {this.state.elements}
-                </Infinite>;
     }
 });
 
@@ -235,13 +187,18 @@ class App extends Component {
                     <h2> Welcome to MediaWiki </h2>
                 </div>
 
-                <InfiniteList />
+                <div>
+                  <List />
+                </div>
+            
+
 
                 <div className="footer">
                     <h6>{data.attributionText}</h6>
                 </div>
             </div>
         );
+
     }
 }
 

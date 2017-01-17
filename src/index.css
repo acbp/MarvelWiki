@@ -25,15 +25,16 @@ body {
     max-width: 320px;
     display: inline-block;
     background-image: url("https://i.annihil.us/u/prod/marvel/i/mg/b/40/image_not_available/portrait_incredible.jpg");
-    
     background-size: cover;
     min-height: 240px;
     min-width: 160px;
 }
 
+
 .image-center {
-    margin-left: auto;
-    margin-right: auto;
+    display: inline-block;
+    margin-left: 10px;
+    margin-right: 10px;
 }
 
 
