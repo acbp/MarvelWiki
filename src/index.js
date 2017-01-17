@@ -1,12 +1,12 @@
 
 import './index.css';
+import 'bootstrap/dist/css/bootstrap.css'; 
 
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
-import { Button,Tooltip, OverlayTrigger } from 'react-bootstrap';
+import { Button,Tooltip, OverlayTrigger, Col, Row } from 'react-bootstrap';
 import {Modal,ModalManager,Effect} from 'react-dynamic-modal'
 import $ from 'jquery';
-import data from './data.json';
 
 
 function api(urlPart){
@@ -21,30 +21,6 @@ function getComics(urlPart){
 	return api("comics"+urlPart);
 }
 
-/**
- * Função para mapear dados do comics para elemento da lista.
- * @private
- * @param   {object} e - dados do comics.
- * @param   {number} i - index.
- * @param   {array}  a - array que esta sendo lido.
- * @returns {array}  lista de elementos.
- */
-const mapComicsElement = function _mapComicsElement(e, i, a){
-    var url = e.thumbnail || e.images;
-    url = url.path+"/portrait_incredible."+url.extension;
-    return (
-        <Card url={url} key={i} data={e} />
-    );
-};
-
-/**
- * Função para mapear dados do comics para elemento da lista.
- * @private
- * @param   {object} e - dados do comics.
- * @param   {number} i - index.
- * @param   {array}  a - array que esta sendo lido.
- * @returns {array}  lista de elementos.
- */
 const Card = React.createClass({
  openModal(){
      const data = this.props.data;
@@ -59,10 +35,35 @@ const Card = React.createClass({
                 role="presentation" 
                 src={this.props.url} 
                 className="thumbnail image-center">
-          </img>
+            
+          </img>            <div className="more-info">Mais Informações</div>
+
       </div>
     );
   }
+});
+
+const ComicsModal =  React.createClass({
+   render(){
+      const { comics, url } = this.props;
+      return (
+         <Modal effect={Effect.ScaleUp}>
+          
+            <Col xs={12} md={4} >
+               <img role="presentation" 
+                    src={url} 
+                    className="thumbnail image-center image-modal"></img> 
+            </Col>
+          
+            <Col xs={12} md={8}>
+              <h1>{comics.title}</h1>
+              <h4 >{"Pages: "+comics.pageCount}</h4>
+              <p>{comics.description?comics.description:""}</p>
+            </Col>
+          
+         </Modal>
+      );
+   }
 });
 
 var ComicsList = React.createClass({
@@ -70,7 +71,7 @@ var ComicsList = React.createClass({
         return {
             offset:0,
             total:10,
-            limit:25,
+            limit:10,
             isInfiniteLoading: false,
             elements: []
         }
@@ -78,14 +79,6 @@ var ComicsList = React.createClass({
     
     componentWillMount: function (){
         this.handleInfiniteLoad();
-    },
-
-    buildElements: function(start, end) {
-        var elements = [];
-        for (var i = start; i < end; i++) {
-            elements.push(<ListItem index={i}/>)
-        }
-        return elements;
     },
 
     handleInfiniteLoad: function() {
@@ -102,16 +95,20 @@ var ComicsList = React.createClass({
         getComics(query).then(
             function(r){
                 var data = r.data,
-                    newElements = data.results.map(mapComicsElement);
-                    
+                    newElements = data.results.map(function _mapComicsElement(e, i, a){
+                      var url = e.thumbnail || e.images;
+                      url = url.path+"/portrait_incredible."+url.extension;
+                      return (
+                          <Card url={url} key={that.state.offset*that.state.limit+i} data={e} />
+                      );
+                  });
+
                 that.setState({
                     isInfiniteLoading: false,
                     total:data.total,
                     offset:(that.state.offset+1),
                     elements: that.state.elements.concat(newElements)
                 });
-                
-                console.log(that.state.elements);
             }
         );
     },
@@ -126,7 +123,7 @@ var ComicsList = React.createClass({
                 </div>
                 
                 <Button className={!this.state.isInfiniteLoading ? '' : 'hidden'} 
-                        block onClick={!this.handleInfiniteLoad}> Carregar mais... </Button>
+                        block onClick={this.handleInfiniteLoad}> Carregar mais... </Button>
             </div>
         );
     }
@@ -135,9 +132,7 @@ var ComicsList = React.createClass({
 
 //                <Button block> Carregar mais... </Button>
 class App extends Component {
-  
     render() {
-      
         return ( 
             <div className="App">
               <div className="App-header">
@@ -147,12 +142,11 @@ class App extends Component {
               <ComicsList />
                   
               <div className="footer">
-                <h6>{data.attributionText}</h6>
+                <h6><a href="//www.marvel.com">Data provided by Marvel. © 2017 MARVEL</a></h6>
               </div>    
                
             </div>
         );
-
     }
 }
 

@@ -1,3 +1,13 @@
+.noselect {
+  -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Chrome/Safari/Opera */
+     -khtml-user-select: none; /* Konqueror */
+       -moz-user-select: none; /* Firefox */
+        -ms-user-select: none; /* Internet Explorer/Edge */
+            user-select: none; /* Non-prefixed version, currently
+                                  not supported by any browser */
+}
+
 body {
     margin: 0;
     padding: 0;
@@ -47,15 +57,13 @@ body {
 
 .more-info{
     background: #222222;
-    width: calc(100% - 35px);
+    width: 100%;
     position: absolute;
     top: calc(50% - 20px);
-    margin-left: 17px;
     color: #ffffff;
     padding: 10px;
     font-size: 18px;
     font-weight: bold;
-    
     display: none;
 }
 
@@ -96,10 +104,22 @@ body {
 
 .footer {
   position: fixed;
-    bottom: 0;
+  bottom: 0;
   right: 0;
   left: 0;
   padding: 1rem;
   background-color: #efefef;
   text-align: center;
+}
+
+.image-modal{
+   width: 100%;
+}
+
+@media (max-width: 992px){
+   .image-modal {
+      margin: auto;
+      width: 30%;
+      margin-top: 10px;
+    }
 }
