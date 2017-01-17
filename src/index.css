@@ -4,6 +4,13 @@ body {
     font-family: sans-serif;
 }
 
+.content{
+    padding: 15px;
+    float: left;
+    margin-bottom: 53px;
+    width: 100%;
+}
+
 .App {
     text-align: center;
 }
@@ -25,20 +32,68 @@ body {
     max-width: 320px;
     display: inline-block;
     background-image: url("https://i.annihil.us/u/prod/marvel/i/mg/b/40/image_not_available/portrait_incredible.jpg");
-    
     background-size: cover;
     min-height: 240px;
     min-width: 160px;
 }
 
 .image-center {
-    margin-left: auto;
-    margin-right: auto;
+    display: inline-block;
+    position: relative;
+}
+
+.more-info{
+    background: #222222;
+    width: calc(100% - 35px);
+    position: absolute;
+    top: calc(50% - 20px);
+    margin-left: 17px;
+    color: #ffffff;
+    padding: 10px;
+    font-size: 18px;
+    font-weight: bold;
+    
+    display: none;
 }
 
 
+.image-center:hover > .thumbnail{
+    animation-name: Thumbnail;
+    animation-duration: 0.5s;
+    animation-fill-mode: forwards;  
+}
+.image-center:hover > .more-info{
+    display: block;
+    opacity: 0;
+    
+    animation-name: MoreInfo;
+    animation-delay: 0.2s;
+    animation-duration: 0.5s;
+    animation-fill-mode: forwards;
+}
+
+@keyframes Thumbnail {
+    from {opacity: 1;}
+    to   {opacity: 0.6;}
+}
+@keyframes MoreInfo {
+    from {opacity: 0;}
+    to   {opacity: 1;}
+}
+
+.is-loading {
+        float: left;
+    width: 100%;
+    padding: 10px;
+    font-size: 20px;
+    margin-bottom: 10px;
+}
+
+.hidden { display:none; }
+
 .footer {
-  position: absolute;
+  position: fixed;
+    bottom: 0;
   right: 0;
   left: 0;
   padding: 1rem;
