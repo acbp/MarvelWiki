@@ -132,7 +132,7 @@ class App extends Component {
         return ( 
             <div className="App">
               <div className="App-header">
-                <h2> Welcome to MediaWiki </h2>
+                <h2> Welcome to MarvelWiki </h2>
               </div>
                 
               <ComicsList />
