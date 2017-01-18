@@ -4,15 +4,14 @@ import 'bootstrap/dist/css/bootstrap.css';
 
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
-import { Button,Tooltip, OverlayTrigger, Col, Row } from 'react-bootstrap';
-import {Modal,ModalManager,Effect} from 'react-dynamic-modal'
+import { Button, Col } from 'react-bootstrap';
+import { Modal, ModalManager, Effect } from 'react-dynamic-modal'
 import $ from 'jquery';
 
 
 function api(urlPart){
-	var 
-    urlPart = urlPart||"",
-    url = "http://gateway.marvel.com/v1/public/" + urlPart + (urlPart.indexOf("?") >= 0 ? "&" : "?") + "apikey=27e0a83bd55f345080c99754fb9ad35b";
+    urlPart = urlPart||"";
+   	var url = "http://gateway.marvel.com/v1/public/" + urlPart + (urlPart.indexOf("?") >= 0 ? "&" : "?") + "apikey=27e0a83bd55f345080c99754fb9ad35b";
 	return $.get(url);
 }
 
@@ -31,13 +30,11 @@ const Card = React.createClass({
   render() {
     return (
        <div className="image-center">
-          <img  onClick={this.openModal}
-                role="presentation" 
-                src={this.props.url} 
-                className="thumbnail image-center">
-            
-          </img>            <div className="more-info">Mais Informações</div>
-
+        <img  onClick={this.openModal}
+              role="presentation" 
+              src={this.props.url} 
+              className="thumbnail image-center"></img>            
+        <div className="more-info">Mais Informações</div>
       </div>
     );
   }
@@ -70,8 +67,8 @@ var ComicsList = React.createClass({
     getInitialState: function() {
         return {
             offset:0,
-            total:10,
-            limit:10,
+            total:Number.POSITIVE_INFINITY,
+            limit:15,
             isInfiniteLoading: false,
             elements: []
         }
@@ -82,34 +79,34 @@ var ComicsList = React.createClass({
     },
 
     handleInfiniteLoad: function() {
-        var that = this, query, page;
+        var that = this, query, page, mul=(this.state.offset*this.state.limit );
         
         this.setState({
             isInfiniteLoading: true
         });
         
-        page="&limit="+this.state.limit+"&offset="+(this.state.offset*this.state.limit);
+        page="&limit="+this.state.limit+"&offset="+mul;
         query="?format=comic&formatType=comic"+page;
      
         //return;
         getComics(query).then(
-            function(r){
-                var data = r.data,
-                    newElements = data.results.map(function _mapComicsElement(e, i, a){
-                      var url = e.thumbnail || e.images;
-                      url = url.path+"/portrait_incredible."+url.extension;
-                      return (
-                          <Card url={url} key={that.state.offset*that.state.limit+i} data={e} />
-                      );
-                  });
+          function(r){
+            var data = r.data,
+                newElements = data.results.map(function _mapComicsElement(e, i, a){
+                  var url = e.thumbnail || e.images;
+                  url = url.path+"/portrait_incredible."+url.extension;
+                  return (
+                      <Card url={url} key={mul+i} data={e} />
+                  );
+              });
 
-                that.setState({
-                    isInfiniteLoading: false,
-                    total:data.total,
-                    offset:(that.state.offset+1),
-                    elements: that.state.elements.concat(newElements)
-                });
-            }
+            that.setState({
+                isInfiniteLoading: false,
+                total:data.total,
+                offset:(that.state.offset+1),
+                elements: that.state.elements.concat(newElements)
+            });
+          }
         );
     },
     
@@ -130,7 +127,6 @@ var ComicsList = React.createClass({
 });
 
 
-//                <Button block> Carregar mais... </Button>
 class App extends Component {
     render() {
         return ( 

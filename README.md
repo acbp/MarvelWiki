@@ -1,2 +1,2 @@
 # MarvelWiki
-Galeria com diversas timelines sobre o universo Marvel.
+Galeria com diversos comics do universo Marvel.
